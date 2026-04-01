@@ -16,6 +16,7 @@ draft: true
 library(tidytuesdayR)
 library(dplyr)
 library(ggplot2)
+library(tidyr)
 
 tuesdata <- tt_load("2026-03-24")
 
@@ -46,7 +47,10 @@ pi_pivot <- pi_digits_m %>%
     names_to = "value",
     values_to = "cumsum"
   )
-
+# pour alléger le graphe
+step <- 1000L
+pi_pivot <- pi_pivot %>%
+  filter(digit_position %in% c(1:100) | digit_position %% step == 0)
 
 ggplot(
   pi_pivot,
@@ -54,12 +58,12 @@ ggplot(
 ) +
   geom_line() +
   #geom_hline(yintercept = 0.1) +
-  coord_cartesian(ylim = c(0, 0.3), xlim = c(0, 1000000)) +
+  coord_cartesian(ylim = c(0.05, 0.15), xlim = c(0, 1000000)) +
   labs(
     title = "Décimales de π : fréquence cumulative des chiffres (0–9)",
     subtitle = paste0(
       "1 point tous les ",
-      step,
+      as.character(step),
       " chiffres ; référence : 10 % (ligne pointillée)"
     ),
     x = "Position dans les décimales",
