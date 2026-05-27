@@ -1,6 +1,8 @@
 ---
 title: "Bienvenue"
 image: profile.jpg
+about:
+  template: jolla
 ---
 
 ::: callout-caution
@@ -9,11 +11,11 @@ image: profile.jpg
 Vous verrez bientôt ma tête ici
 :::
 
-
 Coordinateur en Data Management et développeur R \n
 
 Diplômé d'un Master 2 de Biologie - Physiopathologie & Recherche Clinique \n
 
-Je me suis spécialisé dans la Gouvernance des données et la programmation en R pour des missions de traitement de données de santé, visualisation et automatisation de process. \n
+Je me suis spécialisé dans la Gouvernance des données, le Data Management et la programmation en R pour le traitement et la visualisation de données, ainsi que l'automatisation de process.
+\n
 
-Dans ce blog, vous pourrez retrouver plus de détails sur [mon profil](/pages/profil.qmd), découvrir [les différents usages de R](/pages/articles.qmd) et mes différents [projets](/pages/projets.qmd)
+Dans ce blog, vous pourrez retrouver plus de détails sur [mon profil](/about.qmd), découvrir [les différents usages de R](/pages/articles.qmd) et mes différents [projets](/pages/projets.qmd)

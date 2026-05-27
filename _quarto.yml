@@ -8,7 +8,7 @@ website:
     left:
       - href: index.qmd
         text: Accueil
-      - href: pages/profil.qmd
+      - href: about.qmd
         text: Profil
       - href: pages/articles.qmd
         text: Articles

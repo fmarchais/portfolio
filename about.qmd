@@ -1,0 +1,92 @@
+---
+title: "A propos de moi"
+toc: true
+---
+
+Issu d'un parcours en Biologie et Recherche Clinique, je me suis rapidement dirigé vers le traitement de données de santé à la fin de l'année de Master 1, en me formant en autodidacte au langage R.
+
+Mon parcours professionnel m'a amené à travailler dans le milieu du Dispositif Médical (DM) en orthopédie, puis dans les études de données de vie réelle (RWD) en cancérologie.
+
+Je travaille actuellement au sein d'un laboratoire de nutraceutique en tant que Coordinateur Data Management, sur des problématiques de Data Gouvernance, de Data quality et de diffusion de la "culture data" au sein de l'entreprise.
+
+Mes compétences actuelles portent principalement sur :
+
+- Être le facilitateur entre les équipes métiers et techniques (aider les métiers à formaliser leurs besoins, vulgariser des concepts techniques et les aider à développer une *littératie data*)
+
+- La définition des stratégies de Data Gouvernance et de Data Management de l'entreprise
+
+- Le nettoyage et la qualification de données (fichiers plats ou bases SQL)
+
+- Le développement d'applications Shiny ou de rapports avec Markdown/Quarto (Suivi de projets, comparaison de bases, rapports de qualité)
+
+- Notions de Data Engineering (Automatisation de process, exécution planifiée, requêtage API, webscraping, OCR)
+
+- Notions de DevOps - CI/CD : Git (Hub/Lab), GitHub Actions et Pages, Docker, déploiement d'applications sur serveur.
+
+- Enseignement :
+
+  - Cours d'introduction à R et à la gestion de données, auprès d'étudiants de Licence 2 et Master 2 de biologie
+
+  - Formations à R au sein de mon service
+
+# Stack technique
+
+- Programmation :
+
+  - Maîtrise : R, SQL
+
+  - Notions : HTML, CSS, Python, Shell
+
+- Bases de données :
+
+  - MS SQL, MySQL, Oracle
+
+- Visualisation :
+
+  - R (ggplot2), Qlik Sense
+
+- CI/CD :
+
+  - Git (GitHub, GitLab), Docker
+
+- ETL :
+
+  - Talend
+
+- PaaS :
+
+  - Snowflake, Fivetran
+
+- e-CRF/EDC :
+
+  - REDCap, EasyMedStats
+
+# Roadmap
+
+Les compétences que je souhaite développer dans les mois à venir :
+
+- Finaliser la maîtrise de Duckdb et Arrow pour le Big Data (Juillet 2025) ✅
+
+- Publier une première version de ce site (Rentrée 2025) ✅
+
+- Publier mes supports de cours dans un site Quarto (Rentrée 2025) ✅
+
+- Développer mes compétences CI/CD
+
+  - Être à l'aise avec le déploiement d'applis Shiny et de documents Quarto sur différents outils de publication (GitHub Pages, Posit Connect, Shinyapps.io) (Automne 2025) ✅
+
+  - Apprendre la dockerisation et déployer au moins une appli Shiny dans un docker (Automne 2025) ✅
+
+  - Développer une appli Shiny *Production-grade* avec {rhino} et/ou {golem}, en intégrant des tests unitaires, d'intégration et End-to-End (mi -2026)
+
+- Auto-héberger un site Quarto ou une appli Shiny sur un Raspberry PI, en mettant en place des bonnes pratiques de sécurité (été 2026)
+
+- Publier mon premier package sur le CRAN (2026)
+
+- M'initier aux notions de Systèmes et Réseaux (2026/2027)
+
+- M'initier au Machine Learning (courant 2026)
+
+  - Remise à niveau en statistiques
+
+  - Me former à l'utilisation du package {tidymodels}

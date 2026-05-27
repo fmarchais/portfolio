@@ -1,6 +1,6 @@
 ---
 title: "Frogs"
-description: "Observations des grenouilles en Australie - 2025-09-02"
+description: "Observations des grenouilles en Australie"
 author: "Félix Marchais"
 date: "2025-09-14"
 format: html
@@ -9,10 +9,9 @@ execute:
   echo: true
   message: false
   warning: false
-  draft: true
 ---
 
-![](frogs.jpg)
+![](images/frogs.jpg)
 
 Source : [australian.museum](https://australian.museum/blog/amri-news/do-pobblebonks-sing-to-suit-their-surrounds/)
 
@@ -23,7 +22,7 @@ Pour cette première participation, je vais simplement créer une heatmap pour v
 Dans un premier temps, on va récupérer les données de la semaine.
 
 ```{r setup}
-
+#| eval: false
 library(tidytuesdayR)
 library(dplyr)
 library(leaflet)
@@ -34,6 +33,16 @@ tuesdata <- tt_load("2025-09-02")
 frog_id <- tuesdata$frogID_data
 ```
 
+```{r}
+#| echo: false
+#| eval: true
+library(dplyr)
+library(leaflet)
+library(leaflet.extras)
+frog_id <- read.csv("data/frogs.csv")
+```
+
+
 L'étape de transformation de données sera assez simple :
 
 -   Nettoyer les noms de colonnes
@@ -41,7 +50,6 @@ L'étape de transformation de données sera assez simple :
 -   Compter le nombre d'observation pour chaque combinaison de coordonnées
 
 ```{r cleaning}
-
 df <- frog_id %>%
   select(
     lat = decimalLatitude,
@@ -50,7 +58,6 @@ df <- frog_id %>%
   ) %>%
   group_by(lat, lon) %>%
   count()
-
 ```
 
 Pour le plaisir, je rajouterai les provinces du pays sur la carte. \n
@@ -94,7 +101,6 @@ leaflet(df) %>%
       textOnly = TRUE
     )
   )
-
 ```
 
 Cette carte permet de voir facilement que la côte Ouest a une densité d'observation bien plus importante que le reste du pays, principalement autour de Syndey et Melbourne, avec également un grand nombre d'observations autour de Perth à l'Ouest.

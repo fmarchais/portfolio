@@ -4,7 +4,11 @@ author: "Félix Marchais"
 description: Observations de grues en Suède
 date: "2025-10-07"
 format: html
-
+execute:
+  eval: false
+  echo: true
+  message: false
+  warning: false
 ---
 
 Cette semaine, le jeu de données porte sur l'observation de grues (les oiseaux) au lac Hornborgasjön, en Suède, entre 1994 et 2025.
@@ -13,8 +17,7 @@ L'objectif de ma visualisation est de mettre en évidence la saisonnalité des o
 
 Le code pour obtenir ce graphe :
 
-```r
-
+```{r}
 ##### SETUP ######
 library(tidytuesdayR)
 library(lubridate)
@@ -25,9 +28,6 @@ library(grid)
 
 # For months names
 Sys.setlocale("LC_TIME", "English")
-
-
-
 
 
 ##### DATA #####
@@ -48,9 +48,8 @@ clean_cranes <- cranes %>%
 latest_year <- max(clean_cranes$year, na.rm = TRUE)
 
 # Get the "next" 10.000 after maximal observation number
-y_limit <- ((max(clean_cranes$observations, na.rm = TRUE) %/% 10000) + 1) * 10000
-
-
+y_limit <- ((max(clean_cranes$observations, na.rm = TRUE) %/% 10000) + 1) *
+  10000
 
 
 #####PLOT #####
@@ -81,14 +80,16 @@ clean_cranes %>%
   ) +
 
   # continuous color gradient for the year variable using the viridis-like ramp
-   scale_color_viridis_c(guide = guide_colorbar(title = "Year", barwidth = unit(6, "cm"))) +
+  scale_color_viridis_c(
+    guide = guide_colorbar(title = "Year", barwidth = unit(6, "cm"))
+  ) +
 
   # radial (y) axis - keep the scale available for plotting but don't show the default radial text
   scale_y_continuous(
     limits = c(0, y_limit),
     expand = c(0, 0),
-    breaks = c(0,10000,20000),
-    labels = c("0","10k","20k")
+    breaks = c(0, 10000, 20000),
+    labels = c("0", "10k", "20k")
   ) +
 
   # show months around the circle
@@ -99,7 +100,7 @@ clean_cranes %>%
   ) +
 
   # polar coordinates with January at top
-  coord_polar(start = -pi/2) +
+  coord_polar(start = -pi / 2) +
 
   # labels
   labs(
@@ -122,7 +123,12 @@ clean_cranes %>%
     plot.caption = element_text(size = 9, color = "grey70"),
 
     # make y & x axis more visible
-    axis.text.y = element_text(color = "white", size = 10, margin = margin(r = 6), hjust = 0.5),
+    axis.text.y = element_text(
+      color = "white",
+      size = 10,
+      margin = margin(r = 6),
+      hjust = 0.5
+    ),
     axis.ticks.y = element_line(color = "white", size = 0.5),
     axis.ticks.length = unit(3, "pt"),
     axis.text.x = element_text(color = "grey95", size = 11),
@@ -137,9 +143,7 @@ clean_cranes %>%
     legend.position = "bottom"
   )
 
-
 # ggsave(filename = "my_plot.png", dpi = "retina")
-
 ```
 
 ![](cranes.png){fig-align="center"}

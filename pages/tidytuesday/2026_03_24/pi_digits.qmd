@@ -1,29 +1,38 @@
 ---
 title: "Pi digits"
-description: "Recherche de patterns dans un million de décimales de Pi - 2025-09-02"
+description: "Recherche de patterns dans un million de décimales de Pi"
 author: "Félix Marchais"
-date: "2025-09-14"
+date: "2026-04-12"
 format: html
 execute:
   eval: false
   echo: true
   message: false
   warning: false
-draft: true
 ---
+
+Cette semaine, le jeu de données porte sur le premier million de décimales de Pi. Cela me semble une bonne occasion de parler *d'aléatoire*. Pi étant infini, on s'attendrait à ce que les décimales apparaissent de manière aléatoire et donc que la répartition de chaque décimale de 0 à 9 devienne très stable (10% chacune) rapidement.
+
+Nous allons vérifier cette hypothèse en deux temps
+
+# Prévalence des décimales
+
+Dans un premier temps, nous allons créer un graphe en ligne montrant le taux d'apparition de chaque décimale.
+
+Nous allons commencer par charger les packages et le jeu de données de cette semaine
 
 ```{r}
 library(tidytuesdayR)
 library(dplyr)
-library(ggplot2)
 library(tidyr)
+library(ggplot2)
 
 tuesdata <- tt_load("2026-03-24")
 
 pi_digits <- tuesdata$pi_digits
 ```
 
-
+Ensuite, on va créer une colonne pour chaque décimale, indiquant à chaque ligne (descendre d'une ligne = la décimale suivante de Pi) la somme cumulée d'apparition de cette décimale.
 
 ```{r}
 pi_digits_m <- pi_digits %>%
@@ -39,7 +48,11 @@ pi_digits_m <- pi_digits %>%
     `9` = cumsum(digit == 9) / digit_position,
     `0` = cumsum(digit == 0) / digit_position
   )
+```
 
+Maintenant, nous allons pivoter pour obtenir une ligne par position et par décimale (soit 10 lignes pour chaque décimale de Pi). Cette étape sera nécessaire pour créer notre graphe avec `{ggplot2}`.
+
+```{r}
 pi_pivot <- pi_digits_m %>%
   group_by(digit_position) %>%
   pivot_longer(
@@ -48,23 +61,30 @@ pi_pivot <- pi_digits_m %>%
     values_to = "cumsum"
   )
 # pour alléger le graphe
+# Après les 100 première décimales, on ne garde qu'une toutes les 1.000, jusqu'à 50.000
 step <- 1000L
 pi_pivot <- pi_pivot %>%
-  filter(digit_position %in% c(1:100) | digit_position %% step == 0)
+  filter(digit_position %in% c(1:100) | digit_position %% step == 0) %>%
+  filter(digit_position < 50000)
+```
 
+On peut désormais créer notre graphe en ligne.
+
+Chaque ligne représentera une décimale de 0 à 9. L'axe X représentera la position de la décimale dans Pi et l'axe Y son taux d'apparition
+```{r}
 ggplot(
   pi_pivot,
   aes(x = digit_position, y = cumsum, group = value, color = value)
 ) +
   geom_line() +
   #geom_hline(yintercept = 0.1) +
-  coord_cartesian(ylim = c(0.05, 0.15), xlim = c(0, 1000000)) +
+  coord_cartesian(ylim = c(0.05, 0.15)) +
   labs(
     title = "Décimales de π : fréquence cumulative des chiffres (0–9)",
     subtitle = paste0(
       "1 point tous les ",
       as.character(step),
-      " chiffres ; référence : 10 % (ligne pointillée)"
+      " chiffres après 100; référence : 10 %"
     ),
     x = "Position dans les décimales",
     y = "Fréquence cumulative",
@@ -74,7 +94,22 @@ ggplot(
   theme(legend.position = "right")
 ```
 
+![](/pages/tidytuesday/2026_03_24/images/pi_plot1.png)
 
+On observe en effet que les taux d'apparition s'équilibrent très vite autour de 0.1, avec une très faible dispersion, jusqu'à 0.105 dans les 10.000 premières valeurs, puis elles deviennent vite indiscernables.
+
+A noter que cette dispersion apparaît sur le graphe car j'ai choisi de limiter l'axe Y entre 0.05 et 0.15. Si l'on avait mis l'axe Y de 0 à 1 ou de 0.90 à 0.110, la dispersion visible aurait été différente.
+
+
+# 4-Gram Matrice
+
+Une matrice 4-Gram est une matrice montrant la distribution de valeurs comprises entre 0000 et 1000 (les nombres composés de 4 chiffres) en affichant les deux premiers numéros sur l'axe Y et les deux derniers sur l'axe X.
+
+J'ai vu cette visualisation pour la première fois dans un article l'utilisant pour montrer les patterns dans des codes PINs ayant fuité. Vous pouvez retrouver ce graphe sur [informationisbeautiful.net](https://informationisbeautiful.net/visualizations/most-common-pin-codes/)
+
+![](/pages/tidytuesday/2026_03_24/images/pin_codes.png)
+
+Nous allons faire la même chose ici pour voir si l'on peut observer des patterns, en faisant glisser les séquences de 4 chiffres le long du million de décimales contenues dans le jeu de données.
 
 ```{r}
 library(dplyr)
@@ -82,41 +117,17 @@ library(tidyr)
 library(ggplot2)
 library(scales)
 
-# -------------------------------------------------------------------
-# Objectif global :
-# Construire une heatmap 100×100 des séquences de 4 chiffres (4-grams)
-# - Axe Y : les 2 premiers chiffres (préfixe d1d2)
-# - Axe X : les 2 derniers chiffres (suffixe d3d4)
-# - Couleur : écart relatif à une distribution uniforme attendue
-#   (c’est-à-dire "plus fréquent / moins fréquent que prévu")
-# -------------------------------------------------------------------
-
-# 1) Sécuriser l'ordre et le type des colonnes
+# convertir digit en character, pour pouvoir concaténer ensuite
 pi_sorted <- pi_digits %>%
-  transmute(
-    # pos : position numérique (doit permettre un tri correct)
-    pos = as.integer(digit_position),
-
-    # digit : converti en chaîne, pour pouvoir concaténer ensuite
+  mutate(
     digit = as.character(digit)
-  ) %>%
-  # Filtre de qualité : on ne garde que les digits valides 0..9 et des positions non manquantes
-  filter(!is.na(pos), digit %in% as.character(0:9)) %>%
-  # Tri par position : indispensable pour que lead() prenne les "digits suivants"
-  arrange(pos)
+  )
 
-# Remarque importante :
-# Ce tri suppose que digit_position reflète bien l’ordre réel des décimales
-# et qu’il n’y a pas de doublons/mauvais ordonnancement.
-# En cas de "trous" de positions, lead() va sauter des digits (ça peut biaiser les 4-grams).
-# Si besoin, on peut utiliser row_number() après tri comme index "réel".
-
-# 2) Construire les 4 chiffres successifs via lead()
+# Construire les 4 chiffres successifs via lead()
 quad_counts <- pi_sorted %>%
   mutate(
     # d1 : digit courant
     d1 = digit,
-
     # d2, d3, d4 : digits suivants (fenêtre glissante)
     # lead(digit, k) = digit à la position i+k
     d2 = lead(digit, 1),
@@ -126,10 +137,9 @@ quad_counts <- pi_sorted %>%
   # On supprime les dernières lignes qui n’ont pas 4 digits complets
   # (les 3 dernières lignes auront d4 = NA)
   filter(!is.na(d4)) %>% # garde les fenêtres complètes
-  transmute(
+  mutate(
     # prefix : concaténation des 2 premiers digits (d1d2)
     prefix = paste0(d1, d2),
-
     # suffix : concaténation des 2 derniers digits (d3d4)
     suffix = paste0(d3, d4)
   ) %>%
@@ -162,9 +172,7 @@ quad_full <- quad_counts %>%
 # quad_full a toujours 10 000 lignes (100×100),
 # ce qui est parfait pour une heatmap stable et comparable.
 
-# -------------------------------------------------------------------
-# 5) Écart par rapport à l’attendu uniforme
-# -------------------------------------------------------------------
+# Écart par rapport à l’attendu uniforme
 
 # Nombre total de fenêtres de longueur 4 possibles :
 # si on a N digits, il y a (N - 3) fenêtres chevauchantes de taille 4
@@ -192,9 +200,7 @@ quad_dev <- quad_full %>%
 # Sur 1e6 digits, l’attendu est ≈ 100 occurrences par cellule (ordre de grandeur),
 # donc les fluctuations naturelles seront visibles mais modestes.
 
-# -------------------------------------------------------------------
-# 6) Heatmap des écarts relatifs
-# -------------------------------------------------------------------
+#  Heatmap des écarts relatifs
 ggplot(quad_dev, aes(suffix, prefix, fill = rel)) +
   # geom_tile : un carré par combinaison (prefix,suffix)
   geom_tile() +
@@ -206,6 +212,12 @@ ggplot(quad_dev, aes(suffix, prefix, fill = rel)) +
     high = "#d7191c",
     midpoint = 0,
     labels = percent_format(accuracy = 0.1)
+  ) +
+  scale_x_discrete(
+    breaks = seq(0, 100, by = 5) # Tick marks every 10 units
+  ) +
+  scale_y_discrete(
+    breaks = seq(0, 100, by = 5) # Tick marks every 10 units
   ) +
   labs(
     title = "π — Écart relatif à l'uniforme (séquences de 4 chiffres)",
@@ -223,3 +235,19 @@ ggplot(quad_dev, aes(suffix, prefix, fill = rel)) +
     axis.text.y = element_text(size = 6)
   )
 ```
+
+![](/pages/tidytuesday/2026_03_24/images/4gram_pi.png)
+
+Même si l'on observe pas de patterns comme dans la répartition des codes PINs, on remarque que la distribution n'est pas homogène : certaines combinaisons atteignent les +40% et -20% d'apparitions.
+
+Ce graphe nous rappelle deux choses : Premièrement, Pi n'est pas un nombre "aléatoire", mais une observation d'un rapport entre le rayon d'un cercle et son diamètre. Deuxièmement, répartition aléatoire ne veut pas dire "homogène", et c'est un point crucial !
+
+De nombreux logiciels utilisant des fonctions "aléatoires" trichent en réalité. Ce sont des exemples que l'on a vu avec les playlists YouTube ou Spotify : lorsque celles-ci étaient purement aléatoires, les utilisateurs se plaignaient régulièrement que certains morceaux revenaient trop souvent, et d'autres pas assez. C'en est devenu une leçon de design et d'UX (experience utilisateur) : Pour que l'utilisateur ait une sensation d'aléatoire, il faut en réalité lui fournir un résultat **homogène**. C'est ce qu'on appelle *l'illusion de randomisation* ou *designed randomness*.
+
+Pour aller plus loin, vous trouverez ci-dessous quelques articles qui en parlent, si le sujet vous intéresse :
+
+-  [Les ingénieurs de Spotify nous expliquent comment ils donnent l'illusion d'aléatoire](https://engineering.atspotify.com/2025/11/shuffle-making-random-feel-more-human)
+
+- [L'explication des patterns de spotify](https://tech.yahoo.com/audio/articles/shuffle-isn-t-random-spotify-160738027.html)
+
+- [Un article sur la perception de l'aléatoire et comment Spotify y a répondu](https://scaleengineer.com/blog/why-spotify-s-shuffle-never-felt-random-and-what-they-did-about-it)

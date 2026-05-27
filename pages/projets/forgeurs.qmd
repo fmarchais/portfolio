@@ -7,7 +7,7 @@ author: "Félix Marchais"
 categories: [Quarto]
 ---
 
-J'ai créé ce site avec Quarto pour mon association de JDR (*Jeu de Rôle*) en mars 2026.
+J'ai commencé à créér ce site avec Quarto pour mon association de JDR (*Jeu de Rôle*) en mars 2026.
 L'utilisation de CSS a notamment permis de personnaliser les pages et créer un site qui nous plaisait visuellement.
 Le site est actuellement hébergé sur GitHub Pages et devrait bientôt avoir son propre nom de domaine.
 
