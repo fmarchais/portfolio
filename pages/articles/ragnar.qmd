@@ -13,13 +13,13 @@ image: "/pages/articles/images/ragnar_logo.png"
 
 Etant plutôt du genre à être dans les derniers à suivre une tendance, mon utilisation des LLM était jusqu'à récemment limitée à poser des questions à chat-GPT ou GitHub Copilot. Il y a environ deux semaines, en discutant avec un ami dont le métier est justement d'accompagner les entreprises dans leur passage à l'IA, celui-ci m'a expliqué les différents mots-clés du domaine : "MCP", "Agent", "Contexte" et surtout : **la "RAG"** (Retrieval-Augmented Generation), ou "Génération Augmentée par Récupération".
 
-La RAG, c'est faire lire des documents à un LLM pour qu'il puisse les utiliser dans ses réponse. Cela revient à ajouter de nouvelles données (que l'on estime fiables) à sa base d'entraînement et permet d'étendre ses connaissances dans un domaine précis.
+La RAG, c'est faire lire des documents à un LLM pour qu'il puisse les utiliser dans ses réponses. Cela revient à ajouter de nouvelles données (que l'on estime fiables) à sa base d'entraînement et permet d'étendre ses connaissances dans un domaine précis.
 
 Ca tombe bien ! Depuis que j'ai commencé à coder, j'utilise Zotero pour indexer des tonnes de guides et d'articles sur R. L'idée m'est immédiatement venue : créer un assistant de code spécialisé en R et en données de santé.
 
 # Zotero, c'est quoi ?
 
-[Zotero](https://www.zotero.org), c'est un logiciel gratuit qui permet de se créer une bibliothèque composée de différentes pages Web ou documents. En le téléchargeant, on ajoute une extension à son navigateur qui permet d'ajouter le lien de la page visitée à sa bibliothèque, et si la page affiche un document PDF, de le télécharger.
+[Zotero](https://www.zotero.org) est un logiciel gratuit de bibliographie qui permet de se créer une bibliothèque composée de différentes pages Web ou documents. En le téléchargeant, on ajoute une extension à son navigateur qui permet d'ajouter le lien de la page visitée à sa bibliothèque, et si la page affiche un document PDF, de le télécharger. L'idée est ensuite d'utiliser Zotero pour citer ses sources et créer la bibliographie dans un rapport ou un mémoire, mais nous n'utiliserons pas cette fonctionnalité.
 
 Ma bibliothèque Zotero contient aujourd'hui près d'un millier de documents : des liens vers des livres comme "R for Data Science" d'Hadley Wickham (un classique), des articles de blog, ou des *cheatsheets* (antisèches) résumant le fonctionnement des principaux packages du `Tidyverse`, que l'on peut retrouver par exemple [ici](https://dplyr.tidyverse.org/). Cette bibliothèque est une mine d'or pour moi car elle me permet de retrouver facilement la documentation que j'ai pu parcourir, et sera parfaite pour entraîner un assistant IA.
 
@@ -53,7 +53,7 @@ A noter que tous les modèles "-instruct" ne sont pas nécéssairement compatibl
 
 # Ellmer
 
-`Ellmer` est un package R du `Tidyverse` et développé par Hadley Wickham (encore lui), qui permet de discuter avec différents LLMs depuis R. On utilisera sa fonction `chat_ollama()` pour discuter avec notre assistant.
+`Ellmer` est un package R du `Tidyverse` qui permet de discuter avec différents LLMs depuis R. On utilisera sa fonction `chat_ollama()` pour discuter avec notre assistant.
 
 # Créér son assistant
 
@@ -119,7 +119,7 @@ En considérant une moyenne d'une minute par document, il m'a fallu plus de 30 h
 Le store est une base DuckDB qui contiendra nos documents, découpés en *chunks*, pour permettre à l'assistant d'y accéder.
 
 ```r
-# Si on ne met que le nom, enregistré sous C:/user/votre_nom/ (sur Windows)
+# Si on ne met que le nom, sera enregistré dans votre chemin actif
 store_location <- "zotero_ragnar.duckdb"
 
 # Créer le store

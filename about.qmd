@@ -65,7 +65,7 @@ Mes compétences actuelles portent principalement sur :
 
 Les compétences que je souhaite développer dans les mois à venir :
 
-- Finaliser la maîtrise de Duckdb et Arrow pour le Big Data (Juillet 2025) ✅
+- Finaliser la maîtrise de Duckdb et Arrow pour le Medium/Big Data (Juillet 2025) ✅
 
 - Publier une première version de ce site (Rentrée 2025) ✅
 

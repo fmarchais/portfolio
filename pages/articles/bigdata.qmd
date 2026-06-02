@@ -13,11 +13,11 @@ draft: true
 
 # Medium Data
 
-Tout le monde connaît cette problématique, qui introduit tous les cours sur le Big Data : "*Plus le temps passe et plus les volumes de données à traiter augmentent, d'où l'intérêt d'outils puissants de calcul distribué...*" *et caetera*. Aujourd'hui, je parlerai de *Medium Data* : des données trop volumineuses pour être traitées par la mémoire vive d'un ordinateur (*small data*) mais pouvant être stockée sur un seul ordinateur (à contrario du *Big Data*). En résumé : Comment analyser un jeu de données de 10Go à ~ 1T grâce à R, qui stocke habituellement les données traitées en mémoire vive (16 à 32Go sur les ordinateurs actuels).
+Tout le monde connaît cette problématique, qui introduit tous les cours sur le Big Data : "*Plus le temps passe et plus les volumes de données à traiter augmentent, d'où l'intérêt d'outils puissants de calcul distribué...*" *et caetera*. Aujourd'hui, je parlerai de *Medium Data* : des données trop volumineuses pour être traitées par la mémoire vive d'un ordinateur (*small data*) mais pouvant être stockées sur un seul ordinateur (a contrario du *Big Data*). En résumé : Comment analyser un jeu de données de 10Go à ~ 1T grâce à R, qui stocke habituellement les données traitées en mémoire vive (16 à 32Go sur les ordinateurs actuels).
 
 ## Apache Arrow
 
-Apache Arrow est un framework de traitement de données, utilisant un format colonnaire pour améliorer la performance du traitement. Il est indépendant du langage de programmation (en R, on utilisera le package `{arrow}`) et compatible avec de nombreux formats, comme .csv ou .parquet, mais également avec des bases SQL via son API *ADBC* (Arrow Database Connectivity) et ses drivers.
+Apache Arrow est un standard de format de données en colonnes, permettant à différents moteurs de calculs (DuckDB, Spark) d'accélérer leur traitement. Il est indépendant du langage de programmation (en R, on utilisera le package `{arrow}`) et compatible avec de nombreux formats, comme .csv ou .parquet, mais également avec des bases SQL via son API *ADBC* (Arrow Database Connectivity) et ses drivers.
 
 En R, le package `{adbcdrivermanager}` permet de gérer ces drivers, à la manière de `{odbc}`. Vous pouvez retrouver la documentation d'Apache sur son utilisation dans R [ici](https://arrow.apache.org/adbc/current/r/index.html) et celle d'`abcdrivermanager` [ici](https://arrow.apache.org/adbc/current/r/adbcdrivermanager/index.html)
 
