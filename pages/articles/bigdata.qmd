@@ -13,7 +13,10 @@ draft: true
 
 # Medium Data
 
-Tout le monde connaît cette problématique, qui introduit tous les cours sur le Big Data : "*Plus le temps passe et plus les volumes de données à traiter augmentent, d'où l'intérêt d'outils puissants de calcul distribué...*" *et caetera*. Aujourd'hui, je parlerai de *Medium Data* : des données trop volumineuses pour être traitées par la mémoire vive d'un ordinateur (*small data*) mais pouvant être stockées sur un seul ordinateur (a contrario du *Big Data*). En résumé : Comment analyser un jeu de données de 10Go à ~ 1T grâce à R, qui stocke habituellement les données traitées en mémoire vive (16 à 32Go sur les ordinateurs actuels).
+Tout le monde connaît cette problématique, qui introduit tous les cours sur le Big Data : "*Plus le temps passe et plus les volumes de données à traiter augmentent, d'où l'intérêt d'outils puissants de calcul distribué...*" *et caetera*. Aujourd'hui, je parlerai de *Medium Data* : des données trop volumineuses pour être traitées par la mémoire vive d'un ordinateur (*small data*) mais pouvant être stockées sur un seul ordinateur (a contrario du *Big Data*). En résumé : comment analyser un jeu de données de 10Go à ~1T avec R, qui stocke habituellement les données traitées en mémoire vive (16 à 32Go sur les ordinateurs actuels).
+
+L’idée clé du *Medium Data* est simple : **déporter le calcul hors de la mémoire vive, sans passer par une infrastructure distribuée complexe.**
+
 
 ## Apache Arrow
 
@@ -22,6 +25,11 @@ Apache Arrow est un standard de format de données en colonnes, permettant à di
 En R, le package `{adbcdrivermanager}` permet de gérer ces drivers, à la manière de `{odbc}`. Vous pouvez retrouver la documentation d'Apache sur son utilisation dans R [ici](https://arrow.apache.org/adbc/current/r/index.html) et celle d'`abcdrivermanager` [ici](https://arrow.apache.org/adbc/current/r/adbcdrivermanager/index.html)
 
 A noter que le package `{arrow}` est nativement compatible avec `{dplyr}`, ce qui nous permet de garder la syntaxe simple du *Tidyverse* tout en profitant de la puissance de Arrow.
+
+Concrètement, Arrow permet :
+- de lire des fichiers sans les charger entièrement en mémoire
+- d’exécuter des opérations de manière "paresseuse" (lazy evaluation)
+- de travailler directement sur de gros datasets multi-fichiers
 
 Ci-dessous, un exemple de requête sur un jeu de données de plus d'1 milliard de lignes. Les données sont celles du dataset TLC Trip Record Data (https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page), et contiennent les informations de trajets de taxis new-yorkais. Dans cet exemple, les données de chaque mois entre janvier 2013 et avril 2025 ont été récupérées et regroupées dans un dossier appelé `taxi_dataset`. Ce dossier contient 147 fichiers au format .parquet et pèse 14Go pour plus d'un milliard de lignes (le format .parquet est un format compressé, le même jeu de données en .csv pèse environ 100Go). \n
 
@@ -50,11 +58,128 @@ ds <- open_dataset("D:\\R\\Data engineering\\Big Data\\taxi_dataset",
                      congestion_surcharge = double()
                    )
 )
+
+ds %>%
+  select(trip_distance, passenger_count, fare_amount)
+  filter(trip_distance > 10) %>%
+  summarize(mean_fare = mean(fare_amount, na.rm = TRUE), .by = passenger_count)
+```
+> insérer résultat
+
+A noter que certaines opérations, comme `count()` ou `summarize()` renvoient directement un résultat parce que leur sortie est généralement un objet relativement petit.
+La majorité du temps, l'utilisation d'`arrow` implique une évaluation *lazy*, c'est-à-dire que l'objet obtenu est une requête, mais elle n'est pas exécutée directement (pour économiser de la mémoire). Pour rappatrier le résultat de la requête dans votre environnement, il faudra rajouter `collect()` à la fin de votre requête
+`{arrow}` n'étant compatible qu'avec les verbes de `{dplyr}`, si vous souhaitez utiliser des fonctions d'un autre package, il faudra d'abord rappatrier vos données dans la mémoire vive avec `collect()` avant de pouvoir travailler avec.
+
+
+```r
+# L'objet créé est une requête
+ds_filtered <- ds %>%
+  select(trip_distance, passenger_count, fare_amount)
+  filter(trip_distance > 10)
+
+# L'objet créé est un tableau contenant les données
+ds %>%
+  select(trip_distance, passenger_count, fare_amount)
+  filter(trip_distance > 10) %>%
+    collect()
 ```
 
+
+
+
 ## DuckDB
+DuckDB est un moteur SQL analytique embarqué (in-process), particulièrement adapté au Medium Data. Contrairement à Arrow, DuckDB est un moteur de calcul complet.
+
+Ses points forts :
+
+-  Exécution SQL optimisée (vectorisée, colonnaire)
+-  Lecture directe de fichiers Parquet / CSV
+-  Aucune infrastructure à déployer
+-  Intégration native avec Arrow et {dplyr}
+
+Exemple en R :
+
+```r
+library(DBI)
+library(duckdb)
+library(dplyr)
+
+con <- dbConnect(duckdb::duckdb())
+taxi <- tbl(con, "read_parquet('D:/R/Data engineering/Big Data/taxi_dataset/*.parquet')")
+
+taxi %>%
+  filter(trip_distance > 10) %>%
+  group_by(passenger_count) %>%
+  summarise(avg_price = mean(total_amount, na.rm = TRUE)) %>%
+  collect()
+```
+Ici {dplyr} génère du SQL, DuckDB exécute le calcul et les fichiers sont lus directement sur disque.
+
+DuckDB est souvent la solution la plus simple et la plus performante pour du Medium Data local.
+
+Arrow + DuckDB : combinaison optimale
+Arrow et DuckDB sont complémentaires :
+
+Arrow = format mémoire + interopérabilité
+DuckDB = moteur de calcul
+
+Exemple :
+```r
+library(arrow)
+library(duckdb)
+library(DBI)
+
+ds <- arrow::open_dataset("taxi_dataset")
+con <- DBI::dbConnect(duckdb::duckdb())
+
+duck_tbl <- duckdb::to_duckdb(ds, con)duck_tbl %>%
+  summarise(n = n()) %>%
+  collect()
+```
+Avantage :
+
+aucun chargement complet en RAM
+pipeline entièrement optimisé
+
+
+On pourra aussi désormais citer `{duckplyr}` qui permet de charger directement les packages `{duckdb}` et `{dplyr}`
+
+> insérer un exemple
 
 
 ## Spark et Hadoop
+Lorsque les données dépassent les capacités d'un seul ordinateur (plusieurs To, ou besoin de calcul distribué), il devient nécessaire d'utiliser un moteur distribué comme Spark.
+En R, cela se fait via {sparklyr} :
+```r
+library(sparklyr)
+library(dplyr)
 
-On peut aussi se connecter à un cluster Spark, et envoyer ses requêtes depuis R avec la syntaxe de {dplyr} en utilisant {sparklyr}.
+sc <- spark_connect(master = "local")
+
+df <- spark_read_parquet(sc, "taxi", "taxi_dataset")
+
+df %>%
+  filter(trip_distance > 10) %>%
+  summarise(avg_price = mean(total_amount)) %>%
+  collect()
+
+```
+Ici :
+
+{dplyr} est traduit en code Spark
+le calcul est distribué sur un cluster
+
+
+## Conclusion
+Le Medium Data correspond à une zone souvent négligée entre Excel et le Big Data distribué.
+Avec R, plusieurs outils permettent de traiter efficacement ces volumes :
+
+Arrow pour lire et manipuler des données massives sans surcharge mémoire
+DuckDB pour exécuter des requêtes analytiques rapides en local
+Spark lorsque l’on change d’échelle
+
+Le point clé :
+
+{dplyr} fournit une interface unique, tandis que Arrow, DuckDB ou Spark exécutent réellement les calculs.
+
+Cette approche permet de conserver la simplicité du Tidyverse tout en s'adaptant à des volumes de données bien supérieurs à la mémoire vive.
