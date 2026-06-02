@@ -4,11 +4,6 @@ description: "Recherche de patterns dans un million de décimales de Pi"
 author: "Félix Marchais"
 date: "2026-04-12"
 format: html
-execute:
-  eval: false
-  echo: true
-  message: false
-  warning: false
 ---
 
 Cette semaine, le jeu de données porte sur le premier million de décimales de Pi. Cela me semble une bonne occasion de parler *d'aléatoire*. Pi étant infini, on s'attendrait à ce que les décimales apparaissent de manière aléatoire et donc que la répartition de chaque décimale de 0 à 9 devienne très stable (10% chacune) rapidement.
@@ -21,7 +16,7 @@ Dans un premier temps, nous allons créer un graphe en ligne montrant le taux d'
 
 Nous allons commencer par charger les packages et le jeu de données de cette semaine
 
-```{r}
+```r
 library(tidytuesdayR)
 library(dplyr)
 library(tidyr)
@@ -34,7 +29,7 @@ pi_digits <- tuesdata$pi_digits
 
 Ensuite, on va créer une colonne pour chaque décimale, indiquant à chaque ligne (descendre d'une ligne = la décimale suivante de Pi) la somme cumulée d'apparition de cette décimale.
 
-```{r}
+```r
 pi_digits_m <- pi_digits %>%
   mutate(
     `1` = cumsum(digit == 1) / digit_position,
@@ -52,7 +47,7 @@ pi_digits_m <- pi_digits %>%
 
 Maintenant, nous allons pivoter pour obtenir une ligne par position et par décimale (soit 10 lignes pour chaque décimale de Pi). Cette étape sera nécessaire pour créer notre graphe avec `{ggplot2}`.
 
-```{r}
+```r
 pi_pivot <- pi_digits_m %>%
   group_by(digit_position) %>%
   pivot_longer(
@@ -111,7 +106,7 @@ J'ai vu cette visualisation pour la première fois dans un article l'utilisant p
 
 Nous allons faire la même chose ici pour voir si l'on peut observer des patterns, en faisant glisser les séquences de 4 chiffres le long du million de décimales contenues dans le jeu de données.
 
-```{r}
+```r
 library(dplyr)
 library(tidyr)
 library(ggplot2)
@@ -246,7 +241,7 @@ De nombreux logiciels utilisant des fonctions "aléatoires" trichent en réalit�
 
 Pour aller plus loin, vous trouverez ci-dessous quelques articles qui en parlent, si le sujet vous intéresse :
 
--  [Les ingénieurs de Spotify nous expliquent comment ils donnent l'illusion d'aléatoire](https://engineering.atspotify.com/2025/11/shuffle-making-random-feel-more-human)
+- [Les ingénieurs de Spotify nous expliquent comment ils donnent l'illusion d'aléatoire](https://engineering.atspotify.com/2025/11/shuffle-making-random-feel-more-human)
 
 - [L'explication des patterns de spotify](https://tech.yahoo.com/audio/articles/shuffle-isn-t-random-spotify-160738027.html)
 

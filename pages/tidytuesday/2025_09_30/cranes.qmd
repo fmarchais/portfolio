@@ -4,11 +4,6 @@ author: "Félix Marchais"
 description: Observations de grues en Suède
 date: "2025-10-07"
 format: html
-execute:
-  eval: false
-  echo: true
-  message: false
-  warning: false
 ---
 
 Cette semaine, le jeu de données porte sur l'observation de grues (les oiseaux) au lac Hornborgasjön, en Suède, entre 1994 et 2025.
@@ -17,7 +12,7 @@ L'objectif de ma visualisation est de mettre en évidence la saisonnalité des o
 
 Le code pour obtenir ce graphe :
 
-```{r}
+```r
 ##### SETUP ######
 library(tidytuesdayR)
 library(lubridate)

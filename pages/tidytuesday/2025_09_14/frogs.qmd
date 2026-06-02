@@ -5,7 +5,7 @@ author: "Félix Marchais"
 date: "2025-09-14"
 format: html
 execute:
-  eval: true
+  eval: false
   echo: true
   message: false
   warning: false
@@ -21,8 +21,7 @@ Pour cette première participation, je vais simplement créer une heatmap pour v
 
 Dans un premier temps, on va récupérer les données de la semaine.
 
-```{r setup}
-#| eval: false
+```r
 library(tidytuesdayR)
 library(dplyr)
 library(leaflet)

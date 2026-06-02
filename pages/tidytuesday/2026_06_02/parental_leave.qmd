@@ -1,0 +1,25 @@
+---
+title: "European Parenting Leave Policies"
+description: "Comparaison des durées de congés parentaux en Europe"
+author: "Félix Marchais"
+date: "2026-06-02"
+format: html
+execute:
+  eval: false
+  echo: true
+  message: false
+  warning: false
+---
+
+
+
+```r
+library(tidytuesdayR)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+tuesdata <- tt_load("2026-06-02")
+
+pi_digits <- tuesdata$pi_digits
+```
